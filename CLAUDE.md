@@ -27,7 +27,6 @@ npm run dev:client   # Vite :5173
 - `.env`는 `.gitignore` 대상, `server/.env.example`만 commit
 - 클라이언트의 API 호출은 `client/src/api/client.js` 래퍼만 사용 (`/api/*` 경로)
 - 한 commit = 한 관심사. PR 메시지는 개조식 짧게
-- 커밋 메시지에 `Co-Authored-By: Claude` 등 AI 이름 절대 포함 금지
 
 ## 진행 현황
 

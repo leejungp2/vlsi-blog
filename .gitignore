@@ -7,6 +7,7 @@ dist/
 build/
 **/dist/
 **/build/
+**/.vite/
 
 # env (절대 commit 금지)
 .env
