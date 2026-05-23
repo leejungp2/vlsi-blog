@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
 import PostCard from '../components/PostCard.jsx';
 import DraftEditor from '../components/DraftEditor.jsx';
+import Spinner from '../components/Spinner.jsx';
 import '../components/PostCard.css';
 
 export default function SavedPostsPage() {
@@ -52,7 +53,7 @@ export default function SavedPostsPage() {
     return (
       <section className="section">
         <h2>저장된 포스트</h2>
-        <p className="placeholder">불러오는 중...</p>
+        <Spinner label="포스트 불러오는 중" />
       </section>
     );
   }

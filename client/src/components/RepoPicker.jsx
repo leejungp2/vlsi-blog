@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import Spinner from './Spinner.jsx';
 
 export default function RepoPicker({ value, onChange }) {
   const [state, setState] = useState({ status: 'loading' });
@@ -20,10 +21,17 @@ export default function RepoPicker({ value, onChange }) {
   }, []);
 
   if (state.status === 'loading') {
-    return <p className="placeholder">repo 불러오는 중...</p>;
+    return <Spinner label="repo 불러오는 중" />;
   }
   if (state.status === 'error') {
     return <p className="health-error">repo 조회 실패: {state.message}</p>;
+  }
+  if (state.repos.length === 0) {
+    return (
+      <p className="placeholder">
+        접근 가능한 repo가 없습니다. GITHUB_TOKEN scope에 <code>repo</code> 권한이 포함되었는지 확인하세요.
+      </p>
+    );
   }
 
   return (

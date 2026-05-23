@@ -109,4 +109,4 @@ curl http://localhost:5173/api/health        # Vite proxy 경유
 ## 진행 현황
 
 - [x] 1주차: 기획·설계 + 모노레포 스캐폴딩 + 헬스 체크
-- [ ] 2주차: GitHub API 연동 → commit 선택 → LLM 요약 → 저장/편집/카드 목록
+- [x] 2주차: GitHub API 연동 → commit 선택 → LLM 요약 → 저장/편집/카드 목록

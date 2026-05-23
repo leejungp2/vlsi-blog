@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api/client.js';
+import Spinner from './Spinner.jsx';
 
 function shortSha(sha) {
   return sha?.slice(0, 7) ?? '';
@@ -34,10 +35,13 @@ export default function CommitList({ repoFullName, branch, selected, onChange })
 
   if (state.status === 'idle') return null;
   if (state.status === 'loading') {
-    return <p className="placeholder">commit 불러오는 중...</p>;
+    return <Spinner label="commit 불러오는 중" />;
   }
   if (state.status === 'error') {
     return <p className="health-error">commit 조회 실패: {state.message}</p>;
+  }
+  if (state.commits.length === 0) {
+    return <p className="placeholder">이 branch에 commit이 없습니다.</p>;
   }
 
   const selectedSet = new Set(selected);
