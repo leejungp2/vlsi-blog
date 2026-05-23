@@ -13,13 +13,14 @@ const TONES = [
   { id: 'tutorial', label: '튜토리얼' },
 ];
 
-export default function MyBlogPage() {
+export default function MyBlogPage({ onNavigate }) {
   const [repo, setRepo] = useState(null);
   const [branch, setBranch] = useState(null);
   const [selectedShas, setSelectedShas] = useState([]);
   const [tone, setTone] = useState('retrospective');
   const [draft, setDraft] = useState(null);
   const [draftState, setDraftState] = useState({ status: 'idle' });
+  const [saving, setSaving] = useState(false);
 
   function handleRepoChange(nextRepo) {
     setRepo(nextRepo);
@@ -60,6 +61,24 @@ export default function MyBlogPage() {
 
   const canGenerate =
     repo && branch && selectedShas.length > 0 && draftState.status !== 'loading';
+
+  async function saveDraft() {
+    if (!draft) return;
+    setSaving(true);
+    try {
+      await api.createPost({
+        title: draft.title,
+        body: draft.body,
+        branchTag: draft.branchTag ?? branch,
+        sourceCommits: draft.sourceCommits ?? selectedShas,
+      });
+      onNavigate?.('saved-posts');
+    } catch (err) {
+      setDraftState({ status: 'error', message: err.message });
+    } finally {
+      setSaving(false);
+    }
+  }
 
   return (
     <div className="my-blog-grid">
@@ -127,8 +146,18 @@ export default function MyBlogPage() {
             <DraftEditor
               draft={draft}
               onChange={setDraft}
-              disabled={draftState.status === 'loading'}
+              disabled={draftState.status === 'loading' || saving}
             />
+            <div className="draft-actions">
+              <button
+                type="button"
+                className="primary-button"
+                disabled={saving || !draft.body}
+                onClick={saveDraft}
+              >
+                {saving ? '저장 중...' : '초안 저장'}
+              </button>
+            </div>
           </div>
         )}
       </aside>

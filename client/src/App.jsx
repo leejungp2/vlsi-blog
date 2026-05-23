@@ -18,7 +18,7 @@ function App() {
   return (
     <main className="app">
       <Header current={page} onChange={setPage} />
-      <PageComponent />
+      <PageComponent onNavigate={setPage} />
     </main>
   );
 }

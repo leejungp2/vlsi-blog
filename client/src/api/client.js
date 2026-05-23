@@ -17,6 +17,7 @@ async function request(path, options = {}) {
     }
     throw new Error(`API ${path} failed: ${res.status}${detail}`);
   }
+  if (res.status === 204) return null;
   return res.json();
 }
 
@@ -43,4 +44,10 @@ export const api = {
       method: 'POST',
       body: JSON.stringify({ repoFullName, branch, commitShas, tone }),
     }),
+  listPosts: () => request('/posts'),
+  createPost: (post) =>
+    request('/posts', { method: 'POST', body: JSON.stringify(post) }),
+  updatePost: (id, patch) =>
+    request(`/posts/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  deletePost: (id) => request(`/posts/${id}`, { method: 'DELETE' }),
 };
