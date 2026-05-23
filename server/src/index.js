@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import express from 'express';
 import healthRouter from './routes/health.js';
+import githubRouter from './routes/github.js';
+import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -14,11 +16,14 @@ app.use((req, _res, next) => {
 });
 
 app.use('/api/health', healthRouter);
+app.use('/api/github', githubRouter);
 
 // 404 핸들러
 app.use((req, res) => {
   res.status(404).json({ error: 'Not Found', path: req.url });
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`✓ Smart Blog server listening on http://localhost:${PORT}`);
