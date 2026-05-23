@@ -8,11 +8,34 @@ async function request(path, options = {}) {
     ...options,
   });
   if (!res.ok) {
-    throw new Error(`API ${path} failed: ${res.status}`);
+    let detail = '';
+    try {
+      const body = await res.json();
+      detail = body.error ? ` — ${body.error}` : '';
+    } catch {
+      /* body가 JSON이 아닌 경우는 무시 */
+    }
+    throw new Error(`API ${path} failed: ${res.status}${detail}`);
   }
   return res.json();
 }
 
+function splitFullName(fullName) {
+  const [owner, repo] = String(fullName).split('/');
+  if (!owner || !repo) throw new Error('repoFullName은 "owner/repo" 형식이어야 합니다.');
+  return { owner, repo };
+}
+
 export const api = {
   getHealth: () => request('/health'),
+  listRepos: () => request('/github/repos'),
+  listBranches: (fullName) => {
+    const { owner, repo } = splitFullName(fullName);
+    return request(`/github/repos/${owner}/${repo}/branches`);
+  },
+  listCommits: (fullName, branch) => {
+    const { owner, repo } = splitFullName(fullName);
+    const qs = new URLSearchParams({ branch }).toString();
+    return request(`/github/repos/${owner}/${repo}/commits?${qs}`);
+  },
 };
