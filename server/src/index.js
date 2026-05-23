@@ -3,6 +3,7 @@ import express from 'express';
 import healthRouter from './routes/health.js';
 import githubRouter from './routes/github.js';
 import draftRouter from './routes/draft.js';
+import postsRouter from './routes/posts.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
@@ -19,6 +20,7 @@ app.use((req, _res, next) => {
 app.use('/api/health', healthRouter);
 app.use('/api/github', githubRouter);
 app.use('/api/draft', draftRouter);
+app.use('/api/posts', postsRouter);
 
 // 404 핸들러
 app.use((req, res) => {
