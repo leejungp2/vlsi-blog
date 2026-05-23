@@ -2,25 +2,64 @@ import { useState } from 'react';
 import RepoPicker from '../components/RepoPicker.jsx';
 import BranchPicker from '../components/BranchPicker.jsx';
 import CommitList from '../components/CommitList.jsx';
+import DraftEditor from '../components/DraftEditor.jsx';
+import { api } from '../api/client.js';
 import '../components/Pickers.css';
+import '../components/DraftEditor.css';
+
+const TONES = [
+  { id: 'retrospective', label: '회고' },
+  { id: 'review', label: '리뷰' },
+  { id: 'tutorial', label: '튜토리얼' },
+];
 
 export default function MyBlogPage() {
   const [repo, setRepo] = useState(null);
   const [branch, setBranch] = useState(null);
   const [selectedShas, setSelectedShas] = useState([]);
+  const [tone, setTone] = useState('retrospective');
+  const [draft, setDraft] = useState(null);
+  const [draftState, setDraftState] = useState({ status: 'idle' });
 
-  // I1: repo 변경 시 default_branch로 자동 세팅, commit 선택 초기화
   function handleRepoChange(nextRepo) {
     setRepo(nextRepo);
     setBranch(nextRepo?.default_branch ?? null);
     setSelectedShas([]);
+    setDraft(null);
+    setDraftState({ status: 'idle' });
   }
 
-  // I2: branch 변경 시 commit 선택 초기화
   function handleBranchChange(nextBranch) {
     setBranch(nextBranch);
     setSelectedShas([]);
+    setDraft(null);
+    setDraftState({ status: 'idle' });
   }
+
+  async function generateDraft() {
+    if (!repo || !branch || selectedShas.length === 0) return;
+    setDraftState({ status: 'loading' });
+    try {
+      const result = await api.createDraft({
+        repoFullName: repo.full_name,
+        branch,
+        commitShas: selectedShas,
+        tone,
+      });
+      setDraft({
+        title: result.title,
+        body: result.body,
+        branchTag: result.branchTag,
+        sourceCommits: result.sourceCommits,
+      });
+      setDraftState({ status: 'ok' });
+    } catch (err) {
+      setDraftState({ status: 'error', message: err.message });
+    }
+  }
+
+  const canGenerate =
+    repo && branch && selectedShas.length > 0 && draftState.status !== 'loading';
 
   return (
     <div className="my-blog-grid">
@@ -45,21 +84,53 @@ export default function MyBlogPage() {
       </section>
 
       <aside className="section">
-        <h2>선택된 commit</h2>
-        {selectedShas.length === 0 ? (
-          <p className="placeholder">아직 선택된 commit이 없습니다.</p>
-        ) : (
-          <ul className="selected-shas">
-            {selectedShas.map((sha) => (
-              <li key={sha}>
-                <code>{sha.slice(0, 7)}</code>
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="placeholder" style={{ marginTop: 'var(--sp-4)' }}>
-          다음 commit에서 "요약 생성" 버튼과 에디터가 여기에 들어옵니다.
+        <h2>요약 생성</h2>
+        <div className="tone-row" role="radiogroup" aria-label="요약 톤">
+          {TONES.map((t) => (
+            <label key={t.id}>
+              <input
+                type="radio"
+                name="tone"
+                value={t.id}
+                checked={tone === t.id}
+                onChange={() => setTone(t.id)}
+              />
+              {t.label}
+            </label>
+          ))}
+        </div>
+
+        <p className="placeholder">
+          선택된 commit:{' '}
+          <strong>{selectedShas.length}</strong>개
         </p>
+
+        <div className="draft-actions">
+          <button
+            type="button"
+            className="primary-button"
+            disabled={!canGenerate}
+            onClick={generateDraft}
+          >
+            {draftState.status === 'loading' ? '생성 중...' : '요약 생성'}
+          </button>
+        </div>
+
+        {draftState.status === 'error' && (
+          <p className="health-error" style={{ marginTop: 'var(--sp-3)' }}>
+            {draftState.message}
+          </p>
+        )}
+
+        {draft && (
+          <div style={{ marginTop: 'var(--sp-4)' }}>
+            <DraftEditor
+              draft={draft}
+              onChange={setDraft}
+              disabled={draftState.status === 'loading'}
+            />
+          </div>
+        )}
       </aside>
     </div>
   );

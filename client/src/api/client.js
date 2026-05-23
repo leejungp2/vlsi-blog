@@ -38,4 +38,9 @@ export const api = {
     const qs = new URLSearchParams({ branch }).toString();
     return request(`/github/repos/${owner}/${repo}/commits?${qs}`);
   },
+  createDraft: ({ repoFullName, branch, commitShas, tone }) =>
+    request('/draft', {
+      method: 'POST',
+      body: JSON.stringify({ repoFullName, branch, commitShas, tone }),
+    }),
 };
